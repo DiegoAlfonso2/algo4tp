@@ -117,13 +117,7 @@
        PROCEDURE DIVISION.
        PRINCIPAL.
            PERFORM INICIO.
-           
-           CLOSE PROD.
-           CLOSE SOL1.
-           CLOSE SOL2.
-           CLOSE SOL3.
-           CLOSE MAE.
-           STOP RUN.
+           PERFORM FIN.
        
        RECORRER-TABLA.
            DISPLAY PRODUCTO(IX-PROD).
@@ -181,5 +175,12 @@
         
        MANEJAR-ERROR-ARCHIVO.
            DISPLAY WS-ARCHIVO-ERROR.
+           PERFORM FIN.
+
+       FIN.
            CLOSE PROD.
+           CLOSE SOL1.
+           CLOSE SOL2.
+           CLOSE SOL3.
+           CLOSE MAE.
            STOP RUN.
