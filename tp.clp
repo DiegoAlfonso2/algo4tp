@@ -34,56 +34,60 @@
                05 PROD-DESCRIP            PIC X(15).
            FD SOL1.
            01 SOL1-RECORD.
-               05 SOL1-COD-SOL            PIC 9(6).
-               05 SOL1-FECHA.
-                   07 SOL1-FECHA-AAAA     PIC X(4).
-                   07 FILLER              PIC X(1).
-                   07 SOL1-FECHA-MM       PIC X(2).
-                   07 FILLER              PIC X(1).
-                   07 SOL1-FECHA-DD       PIC X(2).
-               05 SOL1-COD-PROD           PIC 9(4).
-               05 SOL1-CANTIDAD           PIC 9(4).
-               05 SOL1-COD-VENDEDOR       PIC 9(3).
-               05 SOL1-IMPORTE            PIC 9(7)V99.
+               03 SOL1-CLAVE.
+                   05 SOL1-COD-SOL            PIC 9(6).
+                   05 SOL1-FECHA.
+                       07 SOL1-FECHA-AAAA     PIC X(4).
+                       07 FILLER              PIC X(1).
+                       07 SOL1-FECHA-MM       PIC X(2).
+                       07 FILLER              PIC X(1).
+                       07 SOL1-FECHA-DD       PIC X(2).
+                   05 SOL1-COD-PROD           PIC 9(4).
+               03 SOL1-CANTIDAD           PIC 9(4).
+               03 SOL1-COD-VENDEDOR       PIC 9(3).
+               03 SOL1-IMPORTE            PIC 9(7)V99.
            FD SOL2.
            01 SOL2-RECORD.
-               05 SOL2-COD-SOL            PIC 9(6).
-               05 SOL2-FECHA.
-                   07 SOL2-FECHA-AAAA     PIC X(4).
-                   07 FILLER              PIC X(1).
-                   07 SOL2-FECHA-MM       PIC X(2).
-                   07 FILLER              PIC X(1).
-                   07 SOL2-FECHA-DD       PIC X(2).
-               05 SOL2-COD-PROD           PIC 9(4).
-               05 SOL2-CANTIDAD           PIC 9(4).
-               05 SOL2-COD-VENDEDOR       PIC 9(3).
-               05 SOL2-IMPORTE            PIC 9(7)V99.
+               03 SOL2-CLAVE.
+                   05 SOL2-COD-SOL            PIC 9(6).
+                   05 SOL2-FECHA.
+                       07 SOL2-FECHA-AAAA     PIC X(4).
+                       07 FILLER              PIC X(1).
+                       07 SOL2-FECHA-MM       PIC X(2).
+                       07 FILLER              PIC X(1).
+                       07 SOL2-FECHA-DD       PIC X(2).
+                   05 SOL2-COD-PROD           PIC 9(4).
+               03 SOL2-CANTIDAD           PIC 9(4).
+               03 SOL2-COD-VENDEDOR       PIC 9(3).
+               03 SOL2-IMPORTE            PIC 9(7)V99.
            FD SOL3.
            01 SOL3-RECORD.
-               05 SOL3-COD-SOL            PIC 9(6).
-               05 SOL3-FECHA.
-                   07 SOL3-FECHA-AAAA     PIC X(4).
-                   07 FILLER              PIC X(1).
-                   07 SOL3-FECHA-MM       PIC X(2).
-                   07 FILLER              PIC X(1).
-                   07 SOL3-FECHA-DD       PIC X(2).
-               05 SOL3-COD-PROD           PIC 9(4).
-               05 SOL3-CANTIDAD           PIC 9(4).
-               05 SOL3-COD-VENDEDOR       PIC 9(3).
-               05 SOL3-IMPORTE            PIC 9(7)V99.
+               03 SOL3-CLAVE.
+                   05 SOL3-COD-SOL            PIC 9(6).
+                   05 SOL3-FECHA.
+                       07 SOL3-FECHA-AAAA     PIC X(4).
+                       07 FILLER              PIC X(1).
+                       07 SOL3-FECHA-MM       PIC X(2).
+                       07 FILLER              PIC X(1).
+                       07 SOL3-FECHA-DD       PIC X(2).
+                   05 SOL3-COD-PROD           PIC 9(4).
+               03 SOL3-CANTIDAD           PIC 9(4).
+               03 SOL3-COD-VENDEDOR       PIC 9(3).
+               03 SOL3-IMPORTE            PIC 9(7)V99.
            FD MAE.
            01 MAE-RECORD.
-               05 MAE-COD-SOL            PIC 9(6).
-               05 MAE-FECHA.
-                   07 MAE-FECHA-AAAA     PIC X(4).
-                   07 FILLER              PIC X(1).
-                   07 MAE-FECHA-MM       PIC X(2).
-                   07 FILLER              PIC X(1).
-                   07 MAE-FECHA-DD       PIC X(2).
-               05 MAE-COD-PROD           PIC 9(4).
-               05 MAE-CANTIDAD           PIC 9(4).
-               05 MAE-COD-VENDEDOR       PIC 9(3).
-               05 MAE-IMPORTE            PIC 9(7)V99.
+               03 MAE-CLAVE.
+                   05 MAE-COD-SOL            PIC 9(6).
+                   05 MAE-FECHA.
+                       07 MAE-FECHA-AAAA     PIC X(4).
+                       07 FILLER              PIC X(1).
+                       07 MAE-FECHA-MM       PIC X(2).
+                       07 FILLER              PIC X(1).
+                       07 MAE-FECHA-DD       PIC X(2).
+                   05 MAE-COD-PROD           PIC 9(4).
+               03 MAE-CANTIDAD           PIC 9(4).
+               03 MAE-COD-VENDEDOR       PIC 9(3).
+               03 MAE-IMPORTE            PIC 9(7)V99.
 
        WORKING-STORAGE SECTION.
       * FILE STATUSES DE ARCHIVOS
@@ -112,7 +116,7 @@
                    05 PRODUCTO-DESCRIP    PIC X(15).
 
       * VARIABLES
-           01 WS-ARCHIVO-ERROR            PIC X(50).
+           01 WS-MENSAJE-ERROR            PIC X(50).
 
        PROCEDURE DIVISION.
        PRINCIPAL.
@@ -134,32 +138,32 @@
            OPEN INPUT PROD.
            IF NOT PROD-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO PROD.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
            OPEN INPUT SOL1.
            IF NOT SOL1-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO SOL1.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
            OPEN INPUT SOL2.
            IF NOT SOL2-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO SOL2.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
            OPEN INPUT SOL3.
            IF NOT SOL3-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO SOL3.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
            OPEN INPUT MAE.
            IF NOT MAE-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO MAE.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
 
 
@@ -172,41 +176,61 @@
            READ PROD.
            IF NOT PROD-OK AND NOT PROD-EOF THEN
                MOVE 'ERROR LEYENDO ARCHIVO PROD.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
            END-IF.
 
        LEER-SOL1.
            READ SOL1.
-           IF NOT SOL1-OK AND NOT SOL1-EOF THEN
-               MOVE 'ERROR LEYENDO ARCHIVO SOL1.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
-           END-IF.
+           EVALUATE TRUE
+               WHEN SOL1-OK
+                   CONTINUE
+               WHEN SOL1-EOF
+                   MOVE HIGH-VALUES TO SOL1-CLAVE
+               WHEN OTHER
+                   MOVE 'ERROR LEYENDO ARCHIVO SOL1.TXT' 
+                        TO WS-MENSAJE-ERROR
+                   PERFORM MANEJAR-ERROR
+           END-EVALUATE.
 
        LEER-SOL2.
            READ SOL2.
-           IF NOT SOL2-OK AND NOT SOL2-EOF THEN
-               MOVE 'ERROR LEYENDO ARCHIVO SOL2.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
-           END-IF.
+           EVALUATE TRUE
+               WHEN SOL2-OK
+                   CONTINUE
+               WHEN SOL2-EOF
+                   MOVE HIGH-VALUES TO SOL2-CLAVE
+               WHEN OTHER
+                   MOVE 'ERROR LEYENDO ARCHIVO SOL2.TXT' 
+                        TO WS-MENSAJE-ERROR
+                   PERFORM MANEJAR-ERROR
+           END-EVALUATE.
 
        LEER-SOL3.
            READ SOL3.
-           IF NOT SOL3-OK AND NOT SOL3-EOF THEN
-               MOVE 'ERROR LEYENDO ARCHIVO SOL3.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
-           END-IF.
+           EVALUATE TRUE
+               WHEN SOL3-OK
+                   CONTINUE
+               WHEN SOL3-EOF
+                   MOVE HIGH-VALUES TO SOL3-CLAVE
+               WHEN OTHER
+                   MOVE 'ERROR LEYENDO ARCHIVO SOL3.TXT' 
+                        TO WS-MENSAJE-ERROR
+                   PERFORM MANEJAR-ERROR
+           END-EVALUATE.
 
        LEER-MAE.
            READ MAE.
-           IF NOT MAE-OK AND NOT MAE-EOF THEN
-               MOVE 'ERROR LEYENDO ARCHIVO MAE.TXT' 
-                        TO WS-ARCHIVO-ERROR
-               PERFORM MANEJAR-ERROR-ARCHIVO
-           END-IF.
+           EVALUATE TRUE
+               WHEN MAE-OK
+                   CONTINUE
+               WHEN MAE-EOF
+                   MOVE HIGH-VALUES TO MAE-CLAVE
+               WHEN OTHER
+                   MOVE 'ERROR LEYENDO ARCHIVO MAE.TXT' 
+                        TO WS-MENSAJE-ERROR
+                   PERFORM MANEJAR-ERROR
+           END-EVALUATE.
 
        CARGAR-PROD.
            MOVE PROD-RECORD TO PRODUCTO(IX-PROD).
@@ -217,23 +241,45 @@
            PERFORM LEER-SOL2.
            PERFORM LEER-SOL3.
            PERFORM LEER-MAE.
-           PERFORM CICLO-PRINCIPAL UNTIL SOL1-EOF AND SOL2-EOF AND
-                                SOL3-EOF AND MAE-EOF.
+           PERFORM CICLO-PRINCIPAL UNTIL SOL1-EOF 
+                                   AND   SOL2-EOF 
+                                   AND   SOL3-EOF 
+                                   AND   MAE-EOF.
 
        CICLO-PRINCIPAL.
-           DISPLAY '--------------------------'
-           DISPLAY SOL1-COD-SOL.
-           DISPLAY SOL2-COD-SOL.
-           DISPLAY SOL3-COD-SOL.
-           DISPLAY MAE-COD-SOL.
-           IF SOL1-COD-SOL < SOL3-COD-SOL THEN DISPLAY '<<<<<' END-IF.
-           IF NOT SOL1-EOF THEN PERFORM LEER-SOL1 END-IF.
-           IF NOT SOL2-EOF THEN PERFORM LEER-SOL2 END-IF.
-           IF NOT SOL3-EOF THEN PERFORM LEER-SOL3 END-IF.
-           IF NOT MAE-EOF THEN PERFORM LEER-MAE END-IF.
+           EVALUATE TRUE ALSO TRUE ALSO TRUE
+               WHEN         SOL1-CLAVE <= SOL2-CLAVE 
+                       ALSO SOL1-CLAVE <= SOL3-CLAVE 
+                       ALSO SOL1-CLAVE <= MAE-CLAVE
+                   DISPLAY 'SOL1 ' SOL1-CLAVE
+                   PERFORM LEER-SOL1
+               WHEN         SOL2-CLAVE <= SOL1-CLAVE 
+                       ALSO SOL2-CLAVE <= SOL3-CLAVE 
+                       ALSO SOL2-CLAVE <= MAE-CLAVE
+                   DISPLAY 'SOL2 ' SOL2-CLAVE
+                   PERFORM LEER-SOL2
+               WHEN         SOL3-CLAVE <= SOL1-CLAVE 
+                       ALSO SOL3-CLAVE <= SOL2-CLAVE 
+                       ALSO SOL3-CLAVE <= MAE-CLAVE
+                   DISPLAY 'SOL3 ' SOL3-CLAVE
+                   PERFORM LEER-SOL3
+               WHEN         MAE-CLAVE <= SOL1-CLAVE 
+                       ALSO MAE-CLAVE <= SOL2-CLAVE 
+                       ALSO MAE-CLAVE <= SOL3-CLAVE
+                   DISPLAY 'MAE  ' MAE-CLAVE
+                   PERFORM LEER-MAE
+               WHEN OTHER
+                   DISPLAY 'SOL1-CLAVE' SOL1-CLAVE
+                   DISPLAY 'SOL2-CLAVE' SOL2-CLAVE
+                   DISPLAY 'SOL3-CLAVE' SOL3-CLAVE
+                   DISPLAY 'MAE-CLAVE' MAE-CLAVE
+                   MOVE 'ERROR NO CONTEMPLADO PROCESANDO ARCHIVOS' 
+                                            TO WS-MENSAJE-ERROR
+                   PERFORM MANEJAR-ERROR
+           END-EVALUATE.
         
-       MANEJAR-ERROR-ARCHIVO.
-           DISPLAY WS-ARCHIVO-ERROR.
+       MANEJAR-ERROR.
+           DISPLAY WS-MENSAJE-ERROR.
            PERFORM FIN.
 
        FIN.
