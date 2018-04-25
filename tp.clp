@@ -117,6 +117,7 @@
        PROCEDURE DIVISION.
        PRINCIPAL.
            PERFORM INICIO.
+           PERFORM PROCESO.
            PERFORM FIN.
        
        RECORRER-TABLA.
@@ -128,8 +129,6 @@
            PERFORM LEER-PROD.
            PERFORM CARGAR-PROD VARYING IX-PROD FROM 1 BY 1 
                   UNTIL PROD-EOF OR IX-PROD > 2000.
-           PERFORM RECORRER-TABLA VARYING IX-PROD FROM 1 BY 1 
-                  UNTIL IX-PROD > 2000.
 
        ABRIR-ARCHIVOS.
            OPEN INPUT PROD.
@@ -176,11 +175,62 @@
                         TO WS-ARCHIVO-ERROR
                PERFORM MANEJAR-ERROR-ARCHIVO
            END-IF.
-      *    DISPLAY PROD-DESCRIP.
+
+       LEER-SOL1.
+           READ SOL1.
+           IF NOT SOL1-OK AND NOT SOL1-EOF THEN
+               MOVE 'ERROR LEYENDO ARCHIVO SOL1.TXT' 
+                        TO WS-ARCHIVO-ERROR
+               PERFORM MANEJAR-ERROR-ARCHIVO
+           END-IF.
+
+       LEER-SOL2.
+           READ SOL2.
+           IF NOT SOL2-OK AND NOT SOL2-EOF THEN
+               MOVE 'ERROR LEYENDO ARCHIVO SOL2.TXT' 
+                        TO WS-ARCHIVO-ERROR
+               PERFORM MANEJAR-ERROR-ARCHIVO
+           END-IF.
+
+       LEER-SOL3.
+           READ SOL3.
+           IF NOT SOL3-OK AND NOT SOL3-EOF THEN
+               MOVE 'ERROR LEYENDO ARCHIVO SOL3.TXT' 
+                        TO WS-ARCHIVO-ERROR
+               PERFORM MANEJAR-ERROR-ARCHIVO
+           END-IF.
+
+       LEER-MAE.
+           READ MAE.
+           IF NOT MAE-OK AND NOT MAE-EOF THEN
+               MOVE 'ERROR LEYENDO ARCHIVO MAE.TXT' 
+                        TO WS-ARCHIVO-ERROR
+               PERFORM MANEJAR-ERROR-ARCHIVO
+           END-IF.
 
        CARGAR-PROD.
            MOVE PROD-RECORD TO PRODUCTO(IX-PROD).
            PERFORM LEER-PROD.
+
+       PROCESO.
+           PERFORM LEER-SOL1.
+           PERFORM LEER-SOL2.
+           PERFORM LEER-SOL3.
+           PERFORM LEER-MAE.
+           PERFORM CICLO-PRINCIPAL UNTIL SOL1-EOF AND SOL2-EOF AND
+                                SOL3-EOF AND MAE-EOF.
+
+       CICLO-PRINCIPAL.
+           DISPLAY '--------------------------'
+           DISPLAY SOL1-COD-SOL.
+           DISPLAY SOL2-COD-SOL.
+           DISPLAY SOL3-COD-SOL.
+           DISPLAY MAE-COD-SOL.
+           IF SOL1-COD-SOL < SOL3-COD-SOL THEN DISPLAY '<<<<<' END-IF.
+           IF NOT SOL1-EOF THEN PERFORM LEER-SOL1 END-IF.
+           IF NOT SOL2-EOF THEN PERFORM LEER-SOL2 END-IF.
+           IF NOT SOL3-EOF THEN PERFORM LEER-SOL3 END-IF.
+           IF NOT MAE-EOF THEN PERFORM LEER-MAE END-IF.
         
        MANEJAR-ERROR-ARCHIVO.
            DISPLAY WS-ARCHIVO-ERROR.
