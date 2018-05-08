@@ -199,9 +199,6 @@
            PERFORM INICIO.
            PERFORM PROCESO.
            PERFORM FIN.
-       
-       RECORRER-TABLA.
-           DISPLAY PRODUCTO(IX-PROD).
 
        INICIO.
            PERFORM INICIALIZAR-VARIABLES.
