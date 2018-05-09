@@ -162,6 +162,7 @@
 
            01 REP1-CONTROL.
                03 REP1-NRO-LINEA                  PIC X(2).
+
            01 REP1-ACUM.
                03 REP1-ACUM-SUBCLAVE.
                    07 REP1-ACUM-COD-SOL               PIC 9(6).
@@ -173,23 +174,22 @@
                        10 REP1-ACUM-FECHA-DD          PIC X(2).
                03 REP1-ACUM-IMPORTE                   PIC 9(7)V99.
 
+           01 MENOR.
+               03 MENOR-CLAVE.
+                   05 MENOR-SUBCLAVE.
+                       07 MENOR-COD-SOL                 PIC 9(6).
+                       07 MENOR-FECHA.
+                           10 MENOR-FECHA-AAAA          PIC X(4).
+                           10 FILLER                      PIC X(1).
+                           10 MENOR-FECHA-MM            PIC X(2).
+                           10 FILLER                      PIC X(1).
+                           10 MENOR-FECHA-DD            PIC X(2).
+                   05 MENOR-COD-PROD                PIC 9(4).
+               03 MENOR-CANTIDAD                    PIC 9(4).
+               03 MENOR-COD-VENDEDOR                PIC 9(3).
+               03 MENOR-IMPORTE                     PIC 9(7)V99.
 
-      * OTRAS VARIABLES
            01 WS-MENSAJE-ERROR                        PIC X(50).
-           01 REG-ACT.
-               03 REG-ACT-CLAVE.
-                   05 REG-ACT-SUBCLAVE.
-                       07 REG-ACT-COD-SOL                 PIC 9(6).
-                       07 REG-ACT-FECHA.
-                           10 REG-ACT-FECHA-AAAA          PIC X(4).
-                           10 FILLER                      PIC X(1).
-                           10 REG-ACT-FECHA-MM            PIC X(2).
-                           10 FILLER                      PIC X(1).
-                           10 REG-ACT-FECHA-DD            PIC X(2).
-                   05 REG-ACT-COD-PROD                PIC 9(4).
-               03 REG-ACT-CANTIDAD                    PIC 9(4).
-               03 REG-ACT-COD-VENDEDOR                PIC 9(3).
-               03 REG-ACT-IMPORTE                     PIC 9(7)V99.
 
       * CONSTANTES
            77 REPORTE1-MAX-LINEAS         PIC 9(2) VALUE 60.
@@ -244,6 +244,9 @@
            INITIALIZE PRODUCTO-TABLE REPLACING 
                                 NUMERIC DATA BY HIGH-VALUES
                                 ALPHANUMERIC DATA BY HIGH-VALUES.
+           MOVE '2018' TO REP1-HEADER1-FEC-A.
+           MOVE '05' TO REP1-HEADER1-FEC-M.
+           MOVE '08' TO REP1-HEADER1-FEC-D.
            
        LEER-PROD.
            READ PROD.
@@ -252,6 +255,90 @@
                         TO WS-MENSAJE-ERROR
                PERFORM MANEJAR-ERROR
            END-IF.
+
+       CARGAR-PROD.
+           MOVE PROD-RECORD TO PRODUCTO(IX-PROD).
+           PERFORM LEER-PROD.
+
+       PROCESO.
+           PERFORM IMPRIMIR-REP1-HEADER.
+           PERFORM LEER-SOL1.
+           PERFORM LEER-SOL2.
+           PERFORM LEER-SOL3.
+           PERFORM LEER-MAE.
+           PERFORM CICLO-PRINCIPAL UNTIL SOL1-EOF 
+                                   AND   SOL2-EOF 
+                                   AND   SOL3-EOF 
+                                   AND   MAE-EOF.
+ 
+       CICLO-PRINCIPAL.
+           PERFORM DETERMINAR-MENOR-SUBCLAVE.
+           MOVE ZEROES TO REP1-ACUM-IMPORTE.
+           PERFORM PROCESAR-REGISTROS-SUBCLAVE 
+                              UNTIL SOL1-SUBCLAVE <> REP1-ACUM-SUBCLAVE
+                              AND   SOL2-SUBCLAVE <> REP1-ACUM-SUBCLAVE
+                              AND   SOL3-SUBCLAVE <> REP1-ACUM-SUBCLAVE
+                              AND   MAE-SUBCLAVE <> REP1-ACUM-SUBCLAVE.
+           PERFORM IMPRIMIR-REP1-ITEM.
+        
+       DETERMINAR-MENOR-SUBCLAVE.
+           MOVE SOL1-SUBCLAVE TO REP1-ACUM-SUBCLAVE.
+           IF SOL2-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
+               MOVE SOL2-SUBCLAVE TO REP1-ACUM-SUBCLAVE
+           END-IF.
+           IF SOL3-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
+               MOVE SOL3-SUBCLAVE TO REP1-ACUM-SUBCLAVE
+           END-IF.
+           IF MAE-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
+               MOVE MAE-SUBCLAVE TO REP1-ACUM-SUBCLAVE
+           END-IF.
+    
+       PROCESAR-REGISTROS-SUBCLAVE.
+           PERFORM DETERMINAR-MENOR-CLAVE.
+           PERFORM PROCESAR-REGISTROS-MAE 
+                                    UNTIL MAE-EOF
+                                    OR    MAE-CLAVE <> MENOR-CLAVE.
+           PERFORM PROCESAR-REGISTROS-SOL1 
+                                    UNTIL SOL1-EOF
+                                    OR    SOL1-CLAVE <> MENOR-CLAVE.
+           PERFORM PROCESAR-REGISTROS-SOL2 
+                                    UNTIL SOL2-EOF
+                                    OR    SOL2-CLAVE <> MENOR-CLAVE.
+           PERFORM PROCESAR-REGISTROS-SOL3 
+                                    UNTIL SOL3-EOF
+                                    OR    SOL3-CLAVE <> MENOR-CLAVE.
+
+       DETERMINAR-MENOR-CLAVE.
+           MOVE SOL1-CLAVE TO MENOR-CLAVE.
+           IF SOL2-CLAVE < MENOR-CLAVE THEN
+               MOVE SOL2-CLAVE TO MENOR-CLAVE
+           END-IF.
+           IF SOL3-CLAVE < MENOR-CLAVE THEN
+               MOVE SOL3-CLAVE TO MENOR-CLAVE
+           END-IF.
+           IF MAE-CLAVE < MENOR-CLAVE THEN
+               MOVE MAE-CLAVE TO MENOR-CLAVE
+           END-IF.
+        
+       PROCESAR-REGISTROS-MAE.
+           ADD MAE-IMPORTE TO REP1-ACUM-IMPORTE.
+           DISPLAY MAE-RECORD.
+           PERFORM LEER-MAE.
+
+       PROCESAR-REGISTROS-SOL1.
+           ADD SOL1-IMPORTE TO REP1-ACUM-IMPORTE.
+           DISPLAY SOL1-RECORD.
+           PERFORM LEER-SOL1.
+           
+       PROCESAR-REGISTROS-SOL2.
+           ADD SOL2-IMPORTE TO REP1-ACUM-IMPORTE.
+           DISPLAY SOL2-RECORD.
+           PERFORM LEER-SOL2.
+           
+       PROCESAR-REGISTROS-SOL3.
+           ADD SOL3-IMPORTE TO REP1-ACUM-IMPORTE.
+           DISPLAY SOL3-RECORD.
+           PERFORM LEER-SOL3.
 
        LEER-SOL1.
            READ SOL1.
@@ -304,79 +391,6 @@
                         TO WS-MENSAJE-ERROR
                    PERFORM MANEJAR-ERROR
            END-EVALUATE.
-
-       CARGAR-PROD.
-           MOVE PROD-RECORD TO PRODUCTO(IX-PROD).
-           PERFORM LEER-PROD.
-
-       PROCESO.
-           PERFORM LEER-SOL1.
-           MOVE SOL1-SUBCLAVE TO REP1-ACUM-SUBCLAVE.
-           PERFORM LEER-SOL2.
-           IF SOL2-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
-               MOVE SOL2-SUBCLAVE TO REP1-ACUM-SUBCLAVE
-           END-IF.
-           PERFORM LEER-SOL3.
-           IF SOL3-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
-               MOVE SOL3-SUBCLAVE TO REP1-ACUM-SUBCLAVE
-           END-IF.
-           PERFORM LEER-MAE.
-           IF MAE-SUBCLAVE < REP1-ACUM-SUBCLAVE THEN
-               MOVE MAE-SUBCLAVE TO REP1-ACUM-SUBCLAVE
-           END-IF.
-      * TODO: TOMAR LA FECHA DE UN ACCEPT O DEL SISTEMA     
-           MOVE '2018' TO REP1-HEADER1-FEC-A.
-           MOVE '05' TO REP1-HEADER1-FEC-M.
-           MOVE '08' TO REP1-HEADER1-FEC-D.
-           PERFORM IMPRIMIR-REP1-HEADER.
-           PERFORM CICLO-PRINCIPAL UNTIL SOL1-EOF 
-                                   AND   SOL2-EOF 
-                                   AND   SOL3-EOF 
-                                   AND   MAE-EOF.
-           IF REP1-ACUM-SUBCLAVE <> HIGH-VALUES THEN
-               PERFORM IMPRIMIR-REP1-ITEM
-           END-IF.
-
-       CICLO-PRINCIPAL.
-           EVALUATE TRUE ALSO TRUE ALSO TRUE
-               WHEN         SOL1-CLAVE <= SOL2-CLAVE 
-                       ALSO SOL1-CLAVE <= SOL3-CLAVE 
-                       ALSO SOL1-CLAVE <= MAE-CLAVE
-                   MOVE SOL1-RECORD TO REG-ACT
-                   PERFORM LEER-SOL1
-               WHEN         SOL2-CLAVE <= SOL1-CLAVE 
-                       ALSO SOL2-CLAVE <= SOL3-CLAVE 
-                       ALSO SOL2-CLAVE <= MAE-CLAVE
-                   MOVE SOL2-RECORD TO REG-ACT
-                   PERFORM LEER-SOL2
-               WHEN         SOL3-CLAVE <= SOL1-CLAVE 
-                       ALSO SOL3-CLAVE <= SOL2-CLAVE 
-                       ALSO SOL3-CLAVE <= MAE-CLAVE
-                   MOVE SOL3-RECORD TO REG-ACT
-                   PERFORM LEER-SOL3
-               WHEN         MAE-CLAVE <= SOL1-CLAVE 
-                       ALSO MAE-CLAVE <= SOL2-CLAVE 
-                       ALSO MAE-CLAVE <= SOL3-CLAVE
-                   MOVE MAE-RECORD TO REG-ACT
-                   PERFORM LEER-MAE
-               WHEN OTHER
-                   DISPLAY 'SOL1-CLAVE' SOL1-CLAVE
-                   DISPLAY 'SOL2-CLAVE' SOL2-CLAVE
-                   DISPLAY 'SOL3-CLAVE' SOL3-CLAVE
-                   DISPLAY 'MAE-CLAVE' MAE-CLAVE
-                   MOVE 'ERROR NO CONTEMPLADO PROCESANDO ARCHIVOS' 
-                                            TO WS-MENSAJE-ERROR
-                   PERFORM MANEJAR-ERROR
-           END-EVALUATE.
-      * TODO: ESCRIBIR A ARCHIVO
-      *     DISPLAY REG-ACT.
-           IF REG-ACT-SUBCLAVE <> REP1-ACUM-SUBCLAVE THEN
-               PERFORM IMPRIMIR-REP1-ITEM
-               MOVE REG-ACT-SUBCLAVE TO REP1-ACUM-SUBCLAVE
-               MOVE ZEROES TO REP1-ACUM-IMPORTE
-           END-IF.
-           ADD REG-ACT-IMPORTE TO REP1-ACUM-IMPORTE.
-           
 
        IMPRIMIR-REP1-HEADER.
            DISPLAY REP1-HEADER1.
