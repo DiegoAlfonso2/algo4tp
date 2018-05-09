@@ -27,6 +27,10 @@
                ASSIGN TO 'MAE.TXT'
                ORGANIZATION IS SEQUENTIAL
                FILE STATUS IS MAE-FS.
+           SELECT MAE-AC
+               ASSIGN TO 'MAE-AC.TXT'
+               ORGANIZATION IS SEQUENTIAL
+               FILE STATUS IS MAE-AC-FS.
 
        DATA DIVISION.
        FILE SECTION.
@@ -95,6 +99,21 @@
                03 MAE-CANTIDAD           PIC 9(4).
                03 MAE-COD-VENDEDOR       PIC 9(3).
                03 MAE-IMPORTE            PIC 9(7)V99.
+           FD MAE-AC.
+           01 MAE-AC-RECORD.
+               03 MAE-AC-CLAVE.
+                   05 MAE-AC-SUBCLAVE.
+                       07 MAE-AC-COD-SOL            PIC 9(6).
+                       07 MAE-AC-FECHA.
+                           10 MAE-AC-FECHA-AAAA     PIC X(4).
+                           10 FILLER              PIC X(1).
+                           10 MAE-AC-FECHA-MM       PIC X(2).
+                           10 FILLER              PIC X(1).
+                           10 MAE-AC-FECHA-DD       PIC X(2).
+                   05 MAE-AC-COD-PROD           PIC 9(4).
+               03 MAE-AC-CANTIDAD           PIC 9(4).
+               03 MAE-AC-COD-VENDEDOR       PIC 9(3).
+               03 MAE-AC-IMPORTE            PIC 9(7)V99.
 
        WORKING-STORAGE SECTION.
       * FILE STATUSES DE ARCHIVOS
@@ -110,10 +129,11 @@
            01 SOL3-FS                     PIC 9(2).
                88 SOL3-OK                 VALUE '00'.
                88 SOL3-EOF                VALUE '10'.
-           01 MAE-FS                     PIC 9(2).
-               88 MAE-OK                 VALUE '00'.
-               88 MAE-EOF                VALUE '10'.
-
+           01 MAE-FS                      PIC 9(2).
+               88 MAE-OK                  VALUE '00'.
+               88 MAE-EOF                 VALUE '10'.
+           01 MAE-AC-FS                   PIC 9(2).
+               88 MAE-AC-OK               VALUE '00'.
       * TABLA DE PRODUCTOS
            01 PRODUCTO-TABLE.
                03 PRODUCTO                OCCURS 2000 TIMES
@@ -238,7 +258,12 @@
                         TO WS-MENSAJE-ERROR
                PERFORM MANEJAR-ERROR
            END-IF.
-
+           OPEN OUTPUT MAE-AC.
+           IF NOT MAE-AC-OK THEN
+               MOVE 'ERROR ABRIENDO ARCHIVO MAE-AC.TXT' 
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
+           END-IF.
 
        INICIALIZAR-VARIABLES.
            INITIALIZE PRODUCTO-TABLE REPLACING 
@@ -322,22 +347,26 @@
         
        PROCESAR-REGISTROS-MAE.
            ADD MAE-IMPORTE TO REP1-ACUM-IMPORTE.
-           DISPLAY MAE-RECORD.
+           MOVE MAE-RECORD TO MAE-AC-RECORD.
+           PERFORM GRABAR-MAE-AC.
            PERFORM LEER-MAE.
 
        PROCESAR-REGISTROS-SOL1.
            ADD SOL1-IMPORTE TO REP1-ACUM-IMPORTE.
-           DISPLAY SOL1-RECORD.
+           MOVE SOL1-RECORD TO MAE-AC-RECORD.
+           PERFORM GRABAR-MAE-AC.
            PERFORM LEER-SOL1.
            
        PROCESAR-REGISTROS-SOL2.
            ADD SOL2-IMPORTE TO REP1-ACUM-IMPORTE.
-           DISPLAY SOL2-RECORD.
+           MOVE SOL2-RECORD TO MAE-AC-RECORD.
+           PERFORM GRABAR-MAE-AC.
            PERFORM LEER-SOL2.
            
        PROCESAR-REGISTROS-SOL3.
            ADD SOL3-IMPORTE TO REP1-ACUM-IMPORTE.
-           DISPLAY SOL3-RECORD.
+           MOVE SOL3-RECORD TO MAE-AC-RECORD.
+           PERFORM GRABAR-MAE-AC.
            PERFORM LEER-SOL3.
 
        LEER-SOL1.
@@ -391,6 +420,14 @@
                         TO WS-MENSAJE-ERROR
                    PERFORM MANEJAR-ERROR
            END-EVALUATE.
+    
+       GRABAR-MAE-AC.
+           WRITE MAE-AC-RECORD.
+           IF NOT MAE-AC-OK THEN
+               MOVE 'ERROR ESCRIBIENDO ARCHIVO MAE-AC.TXT'
+                    TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
+           END-IF.
 
        IMPRIMIR-REP1-HEADER.
            DISPLAY REP1-HEADER1.
@@ -428,4 +465,5 @@
            CLOSE SOL2.
            CLOSE SOL3.
            CLOSE MAE.
+           CLOSE MAE-AC.
            STOP RUN.
