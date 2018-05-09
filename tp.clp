@@ -31,6 +31,10 @@
                ASSIGN TO 'MAE-AC.TXT'
                ORGANIZATION IS SEQUENTIAL
                FILE STATUS IS MAE-AC-FS.
+           SELECT REP1
+               ASSIGN TO 'REP1.TXT'
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS REP1-FS.
 
        DATA DIVISION.
        FILE SECTION.
@@ -114,6 +118,9 @@
                03 MAE-AC-CANTIDAD           PIC 9(4).
                03 MAE-AC-COD-VENDEDOR       PIC 9(3).
                03 MAE-AC-IMPORTE            PIC 9(7)V99.
+           FD REP1.
+           01 REP1-RECORD.
+               03 REP1-LINEA                PIC X(80).
 
        WORKING-STORAGE SECTION.
       * FILE STATUSES DE ARCHIVOS
@@ -134,6 +141,9 @@
                88 MAE-EOF                 VALUE '10'.
            01 MAE-AC-FS                   PIC 9(2).
                88 MAE-AC-OK               VALUE '00'.
+           01 REP1-FS                     PIC 9(2).
+               88 REP1-OK                 VALUE '00'.
+
       * TABLA DE PRODUCTOS
            01 PRODUCTO-TABLE.
                03 PRODUCTO                OCCURS 2000 TIMES
@@ -181,7 +191,7 @@
                    05 FILLER                    PIC X(55) VALUE SPACES.
 
            01 REP1-CONTROL.
-               03 REP1-NRO-LINEA                  PIC X(2).
+               03 REP1-NRO-LINEA                  PIC 9(2) VALUE 1.
 
            01 REP1-ACUM.
                03 REP1-ACUM-SUBCLAVE.
@@ -261,6 +271,12 @@
            OPEN OUTPUT MAE-AC.
            IF NOT MAE-AC-OK THEN
                MOVE 'ERROR ABRIENDO ARCHIVO MAE-AC.TXT' 
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
+           END-IF.
+           OPEN OUTPUT REP1.
+           IF NOT REP1-OK THEN
+               MOVE 'ERROR ABRIENDO ARCHIVO REP1.TXT' 
                         TO WS-MENSAJE-ERROR
                PERFORM MANEJAR-ERROR
            END-IF.
@@ -430,31 +446,47 @@
            END-IF.
 
        IMPRIMIR-REP1-HEADER.
-           DISPLAY REP1-HEADER1.
-           DISPLAY REP1-HEADER2.
-           DISPLAY REP1-BLANCO.
-           MOVE 4 TO REP1-NRO-LINEA.
+           ADD 1 TO REP1-HEADER1-HOJA.
+           MOVE REP1-HEADER1 TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
+           MOVE REP1-HEADER2 TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
 
        IMPRIMIR-REP1-ITEM.
+           PERFORM IMPRIMIR-REP1-BLANCO.
            PERFORM IMPRIMIR-REP1-SOLICITUD.
            PERFORM IMPRIMIR-REP1-FECHA.
            PERFORM IMPRIMIR-REP1-IMPORTE.
-           DISPLAY REP1-BLANCO.
+
+       IMPRIMIR-REP1-BLANCO.
+           MOVE REP1-BLANCO TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
 
        IMPRIMIR-REP1-SOLICITUD.
            MOVE REP1-ACUM-COD-SOL TO REP1-SOLICITUD-COD.
-           DISPLAY REP1-SOLICITUD.
+           MOVE REP1-SOLICITUD TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
 
        IMPRIMIR-REP1-FECHA.
            MOVE REP1-ACUM-FECHA-DD TO REP1-FECHA-DD.
            MOVE REP1-ACUM-FECHA-MM TO REP1-FECHA-MM.
            MOVE REP1-ACUM-FECHA-AAAA(3:2) TO REP1-FECHA-AA.
-           DISPLAY REP1-FECHA.
+           MOVE REP1-FECHA TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
 
        IMPRIMIR-REP1-IMPORTE.
            MOVE REP1-ACUM-IMPORTE TO REP1-IMPORTE-IMPORTE.
-           DISPLAY REP1-IMPORTE.
-        
+           MOVE REP1-IMPORTE TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
+    
+       IMPRIMIR-REP1-LINEA.
+           WRITE REP1-RECORD.
+           ADD 1 TO REP1-NRO-LINEA.
+           IF REP1-NRO-LINEA > REPORTE1-MAX-LINEAS THEN
+               MOVE 1 TO REP1-NRO-LINEA
+               PERFORM IMPRIMIR-REP1-HEADER
+           END-IF.
+
        MANEJAR-ERROR.
            DISPLAY WS-MENSAJE-ERROR.
            PERFORM FIN.
@@ -466,4 +498,5 @@
            CLOSE SOL3.
            CLOSE MAE.
            CLOSE MAE-AC.
+           CLOSE REP1.
            STOP RUN.
