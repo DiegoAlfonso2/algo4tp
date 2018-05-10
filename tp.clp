@@ -235,6 +235,47 @@
                    05 FILLER                    VALUE 
                                            'LISTADO GENERAL DE VENTAS'.
                    05 FILLER                    PIC X(31) VALUE SPACES.
+               03 REP2-SOLICITUD.
+                   05 FILLER                    VALUE 'COD.SOLICITUD: '.
+                   05 REP2-SOLICITUD-COD        PIC 9(6).
+                   05 FILLER                    PIC X(59) VALUE SPACES.
+               03 REP2-FECHA.
+                   05 FILLER                    VALUE 'FECHA: '.
+                   05 REP2-FECHA-FECHA.
+                       07 REP2-FECHA-DD         PIC X(2).
+                       07 FILLER                VALUE '/'.
+                       07 REP2-FECHA-MM         PIC X(2).
+                       07 FILLER                VALUE '/'.
+                       07 REP2-FECHA-AA         PIC X(2).
+                   05 FILLER                    PIC X(65) VALUE SPACES.
+               03 REP2-BLANCO.
+                   05 FILLER                    PIC X(80) VALUE SPACES.
+               03 REP2-TIT-DETALLE.
+                   05 FILLER                    PIC X(3) VALUE SPACES.
+                   05 FILLER                    VALUE 'Cód Prod'.
+                   05 FILLER                    PIC X(4) VALUE SPACES.
+                   05 FILLER                    VALUE 'Descripción'.
+                   05 FILLER                    PIC X(11) VALUE SPACES.
+                   05 FILLER                    VALUE 'Cantidad'.
+                   05 FILLER                    PIC X(7) VALUE SPACES.
+                   05 FILLER                    VALUE 'Cód Vend'.
+                   05 FILLER                    PIC X(9) VALUE SPACES.
+                   05 FILLER                    VALUE 'Importe'.
+                   05 FILLER                    PIC X(4).
+               03 REP2-SEPARADOR                PIC X(80)
+                                                        VALUE ALL '-'.
+               03 REP2-DET.
+                   05 FILLER                    PIC X(3) VALUE SPACES.
+                   05 REP2-DET-COD-PROD         PIC 9(6).
+                   05 FILLER                    PIC X(6) VALUE SPACES.
+                   05 REP2-DET-DET-PROD         PIC X(15).
+                   05 FILLER                    PIC X(9) VALUE SPACES.
+                   05 REP2-DET-CANTIDAD         PIC 9(4).
+                   05 FILLER                    PIC X(11) VALUE SPACES.
+                   05 REP2-DET-COD-VEND         PIC 9(4).
+                   05 FILLER                    PIC X(11) VALUE SPACES.
+                   05 REP2-DET-IMPORTE          PIC $ZZ.ZZ9,99.
+                   05 FILLER                    PIC X(1) VALUE SPACES.
 
            01 REP2-CTL.
                03 REP2-CTL-NRO-LINEA                  PIC 9(2) VALUE 1.
@@ -363,6 +404,9 @@
        CICLO-PRINCIPAL.
            PERFORM DETERMINAR-MENOR-SUBCLAVE.
            MOVE ZEROES TO REP1-ACUM-IMPORTE.
+           PERFORM IMPRIMIR-REP2-SOLFECHA.
+           PERFORM IMPRIMIR-REP2-HEADER-DETALLE.
+           PERFORM IMPRIMIR-REP2-SEPARADOR.
            PERFORM PROCESAR-REGISTROS-SUBCLAVE 
                               UNTIL SOL1-SUBCLAVE <> REP1-ACUM-SUBCLAVE
                               AND   SOL2-SUBCLAVE <> REP1-ACUM-SUBCLAVE
@@ -414,25 +458,57 @@
            ADD MAE-IMPORTE TO REP1-ACUM-IMPORTE.
            MOVE MAE-RECORD TO MAE-AC-RECORD.
            PERFORM GRABAR-MAE-AC.
+           MOVE MAE-COD-PROD TO REP2-DET-COD-PROD.
+           MOVE MAE-COD-VENDEDOR TO REP2-DET-COD-VEND.
+           MOVE MAE-CANTIDAD TO REP2-DET-CANTIDAD.
+           MOVE MAE-IMPORTE TO REP2-DET-IMPORTE.
+           PERFORM COMPLETAR-DESCRIP-PROD.
+           PERFORM IMPRIMIR-REP2-DETALLE.
            PERFORM LEER-MAE.
 
        PROCESAR-REGISTROS-SOL1.
            ADD SOL1-IMPORTE TO REP1-ACUM-IMPORTE.
            MOVE SOL1-RECORD TO MAE-AC-RECORD.
            PERFORM GRABAR-MAE-AC.
+           MOVE SOL1-COD-PROD TO REP2-DET-COD-PROD.
+           MOVE SOL1-COD-VENDEDOR TO REP2-DET-COD-VEND.
+           MOVE SOL1-CANTIDAD TO REP2-DET-CANTIDAD.
+           MOVE SOL1-IMPORTE TO REP2-DET-IMPORTE.
+           PERFORM COMPLETAR-DESCRIP-PROD.
+           PERFORM IMPRIMIR-REP2-DETALLE.
            PERFORM LEER-SOL1.
            
        PROCESAR-REGISTROS-SOL2.
            ADD SOL2-IMPORTE TO REP1-ACUM-IMPORTE.
            MOVE SOL2-RECORD TO MAE-AC-RECORD.
            PERFORM GRABAR-MAE-AC.
+           MOVE SOL2-COD-PROD TO REP2-DET-COD-PROD.
+           MOVE SOL2-COD-VENDEDOR TO REP2-DET-COD-VEND.
+           MOVE SOL2-CANTIDAD TO REP2-DET-CANTIDAD.
+           MOVE SOL2-IMPORTE TO REP2-DET-IMPORTE.
+           PERFORM COMPLETAR-DESCRIP-PROD.
+           PERFORM IMPRIMIR-REP2-DETALLE.
            PERFORM LEER-SOL2.
            
        PROCESAR-REGISTROS-SOL3.
            ADD SOL3-IMPORTE TO REP1-ACUM-IMPORTE.
            MOVE SOL3-RECORD TO MAE-AC-RECORD.
            PERFORM GRABAR-MAE-AC.
+           MOVE SOL3-COD-PROD TO REP2-DET-COD-PROD.
+           MOVE SOL3-COD-VENDEDOR TO REP2-DET-COD-VEND.
+           MOVE SOL3-CANTIDAD TO REP2-DET-CANTIDAD.
+           MOVE SOL3-IMPORTE TO REP2-DET-IMPORTE.
+           PERFORM COMPLETAR-DESCRIP-PROD.
+           PERFORM IMPRIMIR-REP2-DETALLE.
            PERFORM LEER-SOL3.
+
+       COMPLETAR-DESCRIP-PROD.
+           SET IX-PROD TO 1.
+           SEARCH PRODUCTO
+               AT END
+                   DISPLAY 'PROD ' REP2-DET-COD-PROD(3:4) ' NOT FOUND'
+               WHEN PRODUCTO-COD(IX-PROD) = REP2-DET-COD-PROD(3:4)
+                   MOVE PRODUCTO-DESCRIP(IX-PROD) TO REP2-DET-DET-PROD.
 
        LEER-SOL1.
            READ SOL1.
@@ -547,6 +623,40 @@
            MOVE REP2-HEADER1 TO REP2-LINEA.
            PERFORM IMPRIMIR-REP2-LINEA.
            MOVE REP2-HEADER2 TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-SOLFECHA.
+           PERFORM IMPRIMIR-REP2-BLANCO.
+           PERFORM IMPRIMIR-REP2-SOLICITUD.
+           PERFORM IMPRIMIR-REP2-FECHA.
+
+       IMPRIMIR-REP2-SOLICITUD.
+           MOVE REP1-ACUM-COD-SOL TO REP2-SOLICITUD-COD.
+           MOVE REP2-SOLICITUD TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-FECHA.
+           MOVE REP1-ACUM-FECHA-DD TO REP2-FECHA-DD.
+           MOVE REP1-ACUM-FECHA-MM TO REP2-FECHA-MM.
+           MOVE REP1-ACUM-FECHA-AAAA(3:2) TO REP2-FECHA-AA.
+           MOVE REP2-FECHA TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-HEADER-DETALLE.
+           PERFORM IMPRIMIR-REP2-BLANCO.
+           MOVE REP2-TIT-DETALLE TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-SEPARADOR.
+           MOVE REP2-SEPARADOR TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-DETALLE.
+           MOVE REP2-DET TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-BLANCO.
+           MOVE REP2-BLANCO TO REP2-LINEA.
            PERFORM IMPRIMIR-REP2-LINEA.
 
        IMPRIMIR-REP2-LINEA.
