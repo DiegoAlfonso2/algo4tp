@@ -189,9 +189,13 @@
                    05 FILLER                    VALUE 'IMPORTE TOTAL: '.
                    05 REP1-IMPORTE-IMPORTE      PIC $ZZ.ZZ9,99.
                    05 FILLER                    PIC X(55) VALUE SPACES.
+               03 REP1-TOT-GENERAL.
+                   05 FILLER                    VALUE 'TOTAL GENERAL: '.
+                   05 REP1-TOT-GENERAL-IMP      PIC $ZZZ.ZZZ.ZZ9,99.
+                   05 FILLER                    PIC X(50) VALUE SPACES.
 
-           01 REP1-CONTROL.
-               03 REP1-NRO-LINEA                  PIC 9(2) VALUE 1.
+           01 REP1-CTL.
+               03 REP1-CTL-NRO-LINEA                  PIC 9(2) VALUE 1.
 
            01 REP1-ACUM.
                03 REP1-ACUM-SUBCLAVE.
@@ -203,6 +207,7 @@
                        10 FILLER                      PIC X(1).
                        10 REP1-ACUM-FECHA-DD          PIC X(2).
                03 REP1-ACUM-IMPORTE                   PIC 9(7)V99.
+               03 REP1-ACUM-TOT-GEN                   PIC 9(9)V99.
 
            01 MENOR.
                03 MENOR-CLAVE.
@@ -302,6 +307,7 @@
            PERFORM LEER-PROD.
 
        PROCESO.
+           MOVE ZERO TO REP1-ACUM-TOT-GEN.
            PERFORM IMPRIMIR-REP1-HEADER.
            PERFORM LEER-SOL1.
            PERFORM LEER-SOL2.
@@ -311,6 +317,7 @@
                                    AND   SOL2-EOF 
                                    AND   SOL3-EOF 
                                    AND   MAE-EOF.
+           PERFORM IMPRIMIR-REP1-TOT-GEN.
  
        CICLO-PRINCIPAL.
            PERFORM DETERMINAR-MENOR-SUBCLAVE.
@@ -321,6 +328,7 @@
                               AND   SOL3-SUBCLAVE <> REP1-ACUM-SUBCLAVE
                               AND   MAE-SUBCLAVE <> REP1-ACUM-SUBCLAVE.
            PERFORM IMPRIMIR-REP1-ITEM.
+           ADD REP1-ACUM-IMPORTE TO REP1-ACUM-TOT-GEN.
         
        DETERMINAR-MENOR-SUBCLAVE.
            MOVE SOL1-SUBCLAVE TO REP1-ACUM-SUBCLAVE.
@@ -458,6 +466,12 @@
            PERFORM IMPRIMIR-REP1-FECHA.
            PERFORM IMPRIMIR-REP1-IMPORTE.
 
+       IMPRIMIR-REP1-TOT-GEN.
+           PERFORM IMPRIMIR-REP1-BLANCO.
+           MOVE REP1-ACUM-TOT-GEN TO REP1-TOT-GENERAL-IMP.
+           MOVE REP1-TOT-GENERAL TO REP1-LINEA.
+           PERFORM IMPRIMIR-REP1-LINEA.
+
        IMPRIMIR-REP1-BLANCO.
            MOVE REP1-BLANCO TO REP1-LINEA.
            PERFORM IMPRIMIR-REP1-LINEA.
@@ -481,9 +495,9 @@
     
        IMPRIMIR-REP1-LINEA.
            WRITE REP1-RECORD.
-           ADD 1 TO REP1-NRO-LINEA.
-           IF REP1-NRO-LINEA > REPORTE1-MAX-LINEAS THEN
-               MOVE 1 TO REP1-NRO-LINEA
+           ADD 1 TO REP1-CTL-NRO-LINEA.
+           IF REP1-CTL-NRO-LINEA > REPORTE1-MAX-LINEAS THEN
+               MOVE 1 TO REP1-CTL-NRO-LINEA
                PERFORM IMPRIMIR-REP1-HEADER
            END-IF.
 
