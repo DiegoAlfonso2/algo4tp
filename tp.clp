@@ -35,6 +35,10 @@
                ASSIGN TO 'REP1.TXT'
                ORGANIZATION IS LINE SEQUENTIAL
                FILE STATUS IS REP1-FS.
+           SELECT REP2
+               ASSIGN TO 'REP2.TXT'
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS REP2-FS.
 
        DATA DIVISION.
        FILE SECTION.
@@ -121,6 +125,9 @@
            FD REP1.
            01 REP1-RECORD.
                03 REP1-LINEA                PIC X(80).
+           FD REP2.
+           01 REP2-RECORD.
+               03 REP2-LINEA                PIC X(80).
 
        WORKING-STORAGE SECTION.
       * FILE STATUSES DE ARCHIVOS
@@ -143,6 +150,8 @@
                88 MAE-AC-OK               VALUE '00'.
            01 REP1-FS                     PIC 9(2).
                88 REP1-OK                 VALUE '00'.
+           01 REP2-FS                     PIC 9(2).
+               88 REP2-OK                 VALUE '00'.
 
       * TABLA DE PRODUCTOS
            01 PRODUCTO-TABLE.
@@ -209,6 +218,27 @@
                03 REP1-ACUM-IMPORTE                   PIC 9(7)V99.
                03 REP1-ACUM-TOT-GEN                   PIC 9(9)V99.
 
+           01 REP2-LINEAS.
+               03 REP2-HEADER1.
+                   05 FILLER                      VALUE 'Fecha: '.
+                   05 REP2-HEADER1-FECHA.
+                       07 REP2-HEADER1-FEC-A      PIC X(4).
+                       07 FILLER                  VALUE '/'.
+                       07 REP2-HEADER1-FEC-M      PIC X(2).
+                       07 FILLER                  VALUE '/'.
+                       07 REP2-HEADER1-FEC-D      PIC X(2).
+                   05 FILLER                    PIC X(52) VALUE SPACES.
+                   05 FILLER                      VALUE 'Hoja nro '.
+                   05 REP2-HEADER1-HOJA           PIC 99. 
+               03 REP2-HEADER2.
+                   05 FILLER                    PIC X(27) VALUE SPACES.
+                   05 FILLER                    VALUE 
+                                           'LISTADO GENERAL DE VENTAS'.
+                   05 FILLER                    PIC X(31) VALUE SPACES.
+
+           01 REP2-CTL.
+               03 REP2-CTL-NRO-LINEA                  PIC 9(2) VALUE 1.
+
            01 MENOR.
                03 MENOR-CLAVE.
                    05 MENOR-SUBCLAVE.
@@ -228,6 +258,7 @@
 
       * CONSTANTES
            77 REPORTE1-MAX-LINEAS         PIC 9(2) VALUE 60.
+           77 REPORTE2-MAX-LINEAS         PIC 9(2) VALUE 60.
 
        PROCEDURE DIVISION.
        PRINCIPAL.
@@ -285,6 +316,12 @@
                         TO WS-MENSAJE-ERROR
                PERFORM MANEJAR-ERROR
            END-IF.
+           OPEN OUTPUT REP2.
+           IF NOT REP2-OK THEN
+               MOVE 'ERROR ABRIENDO ARCHIVO REP2.TXT' 
+                        TO WS-MENSAJE-ERROR
+               PERFORM MANEJAR-ERROR
+           END-IF.
 
        INICIALIZAR-VARIABLES.
            INITIALIZE PRODUCTO-TABLE REPLACING 
@@ -293,7 +330,10 @@
            MOVE '2018' TO REP1-HEADER1-FEC-A.
            MOVE '05' TO REP1-HEADER1-FEC-M.
            MOVE '08' TO REP1-HEADER1-FEC-D.
-           
+           MOVE '2018' TO REP2-HEADER1-FEC-A.
+           MOVE '05' TO REP2-HEADER1-FEC-M.
+           MOVE '08' TO REP2-HEADER1-FEC-D.
+
        LEER-PROD.
            READ PROD.
            IF NOT PROD-OK AND NOT PROD-EOF THEN
@@ -309,6 +349,7 @@
        PROCESO.
            MOVE ZERO TO REP1-ACUM-TOT-GEN.
            PERFORM IMPRIMIR-REP1-HEADER.
+           PERFORM IMPRIMIR-REP2-HEADER.
            PERFORM LEER-SOL1.
            PERFORM LEER-SOL2.
            PERFORM LEER-SOL3.
@@ -501,6 +542,21 @@
                PERFORM IMPRIMIR-REP1-HEADER
            END-IF.
 
+       IMPRIMIR-REP2-HEADER.
+           ADD 1 TO REP2-HEADER1-HOJA.
+           MOVE REP2-HEADER1 TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+           MOVE REP2-HEADER2 TO REP2-LINEA.
+           PERFORM IMPRIMIR-REP2-LINEA.
+
+       IMPRIMIR-REP2-LINEA.
+           WRITE REP2-RECORD.
+           ADD 1 TO REP2-CTL-NRO-LINEA.
+           IF REP2-CTL-NRO-LINEA > REPORTE2-MAX-LINEAS THEN
+               MOVE 1 TO REP2-CTL-NRO-LINEA
+               PERFORM IMPRIMIR-REP2-HEADER
+           END-IF.
+
        MANEJAR-ERROR.
            DISPLAY WS-MENSAJE-ERROR.
            PERFORM FIN.
@@ -513,4 +569,5 @@
            CLOSE MAE.
            CLOSE MAE-AC.
            CLOSE REP1.
+           CLOSE REP2.
            STOP RUN.
