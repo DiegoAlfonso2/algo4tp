@@ -38,8 +38,31 @@
 
        PROCEDURE DIVISION USING PAR-IN, PAR-OUT.
        PRINCIPAL.
+            PERFORM ABRIR-ARCHIVO.
+            PERFORM ALTA-MODIF-DATO.
+            PERFORM FIN.
+            
+            
+       ABRIR-ARCHIVO.
+            OPEN I-O PVE.
 
-            DISPLAY PAR-IN.
-            DISPLAY PAR-OUT.
-            MOVE '45' TO PAR-OUT-RET-COD.
+       ALTA-MODIF-DATO.
+      *      MOVE PAR-IN-COD-PROD TO PVE-COD-PROD.
+      *      MOVE PAR-IN-FECHA TO PVE-FECHA.
+      *      MOVE PAR-IN-CANTIDAD TO PVE-CANTIDAD.
+            MOVE PAR-IN TO PVE-RECORD.
+      *      MOVE MODO-MODIF TO MODO-ACTUALIZACION.
+            WRITE PVE-RECORD
+                INVALID KEY PERFORM ACTUALIZAR-DATO.
+
+       ACTUALIZAR-DATO.
+            READ PVE RECORD
+                INVALID KEY PERFORM FIN.
+            ADD PAR-IN-CANTIDAD TO PVE-CANTIDAD.
+            ADD PAR-IN-IMPORTE TO PVE-IMPORTE.
+            REWRITE PVE-RECORD.
+
+       FIN.
+            MOVE PVE-FS TO PAR-OUT-RET-COD.
+            CLOSE PVE.
             EXIT PROGRAM.
