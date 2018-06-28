@@ -93,6 +93,10 @@
 
       * INTERCAMBIO CON RUTINA EXTERNA
            01 UPD-PROD-VEN-INPUT.
+               03 UPD-PV-IN-MODO           PIC X.
+                   88 UPD-PV-MODO-OPEN     VALUE 'O'.
+                   88 UPD-PV-MODO-CLOSE    VALUE 'C'.
+                   88 UPD-PV-MODO-UPD      VALUE 'U'.
                03 UPD-PV-IN-COD-PROD       PIC 9(4).
                03 UPD-PV-IN-FECHA          PIC X(10).
                03 UPD-PV-IN-CANTIDAD       PIC 9(4).
@@ -196,6 +200,9 @@
            DISPLAY 'COD. RETORNO: ' WS-COD-ERROR.
            CLOSE VEN.
            CLOSE SOLIC.
+           SET UPD-PV-MODO-CLOSE TO TRUE.
+           CALL 'UPD-PROD-VEND' USING UPD-PROD-VEN-INPUT,
+                                      UPD-PROD-VEN-OUTPUT.
            STOP RUN.
 
        ENTRADA SECTION.
@@ -207,6 +214,9 @@
        INICIO.
            OPEN INPUT SOLIC.
            OPEN INPUT VEN.
+           SET UPD-PV-MODO-OPEN TO TRUE.
+           CALL 'UPD-PROD-VEND' USING UPD-PROD-VEN-INPUT,
+                                      UPD-PROD-VEN-OUTPUT.
 
        PROCESO.
            PERFORM LEER-SOLIC.
@@ -266,6 +276,7 @@
            MOVE SOLIC-FECHA TO UPD-PV-IN-FECHA.
            MOVE SOLIC-CANTIDAD TO UPD-PV-IN-CANTIDAD.
            MOVE SOLIC-IMPORTE TO UPD-PV-IN-IMPORTE.
+           SET UPD-PV-MODO-UPD TO TRUE.
            CALL 'UPD-PROD-VEND' USING UPD-PROD-VEN-INPUT,
                                       UPD-PROD-VEN-OUTPUT.
            IF NOT UPD-PV-RET-OK THEN
@@ -277,6 +288,9 @@
        FIN.
            CLOSE SOLIC.
            CLOSE VEN.
+           SET UPD-PV-MODO-CLOSE TO TRUE.
+           CALL 'UPD-PROD-VEND' USING UPD-PROD-VEN-INPUT,
+                                      UPD-PROD-VEN-OUTPUT.
 
        SALIDA SECTION.
            PERFORM INICIALIZAR-REPA.

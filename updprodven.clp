@@ -29,6 +29,7 @@
 
        LINKAGE SECTION.
             01   PAR-IN.
+               03 PAR-IN-MODO            PIC X.
                03 PAR-IN-COD-PROD        PIC 9(4).
                03 PAR-IN-FECHA           PIC X(10).
                03 PAR-IN-CANTIDAD        PIC 9(4).
@@ -38,13 +39,26 @@
 
        PROCEDURE DIVISION USING PAR-IN, PAR-OUT.
        PRINCIPAL.
-            PERFORM ABRIR-ARCHIVO.
-            PERFORM ALTA-MODIF-DATO.
+            EVALUATE PAR-IN-MODO
+                  WHEN 'O'
+                        PERFORM ABRIR-ARCHIVO
+                  WHEN 'C'
+                        PERFORM CERRAR-ARCHIVO
+                  WHEN 'U'
+                        PERFORM ALTA-MODIF-DATO
+                  WHEN OTHER
+                        MOVE '99' TO PAR-OUT-RET-COD
+            END-EVALUATE.
             PERFORM FIN.
             
             
        ABRIR-ARCHIVO.
             OPEN I-O PVE.
+            MOVE PVE-FS TO PAR-OUT-RET-COD.
+
+       CERRAR-ARCHIVO.
+            CLOSE PVE.
+            MOVE PVE-FS TO PAR-OUT-RET-COD.
 
        ALTA-MODIF-DATO.
       *      MOVE PAR-IN-COD-PROD TO PVE-COD-PROD.
@@ -54,6 +68,7 @@
       *      MOVE MODO-MODIF TO MODO-ACTUALIZACION.
             WRITE PVE-RECORD
                 INVALID KEY PERFORM ACTUALIZAR-DATO.
+            MOVE PVE-FS TO PAR-OUT-RET-COD.
 
        ACTUALIZAR-DATO.
             READ PVE RECORD
@@ -63,6 +78,4 @@
             REWRITE PVE-RECORD.
 
        FIN.
-            MOVE PVE-FS TO PAR-OUT-RET-COD.
-            CLOSE PVE.
             EXIT PROGRAM.

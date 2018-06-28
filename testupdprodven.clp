@@ -23,6 +23,7 @@
 
        WORKING-STORAGE SECTION.
           01   PAR-IN.
+               03 PAR-IN-MODO            PIC X.
                03 PAR-IN-PK.
                     05 PAR-IN-COD-PROD   PIC 9(4).
                     05 PAR-IN-FECHA      PIC X(10).
@@ -36,15 +37,20 @@
 
        PROCEDURE DIVISION.
        PRINCIPAL.
+            DISPLAY 'ANTES DE INVOCAR EL SUBPROGRAMA'.
             MOVE '7774' TO PAR-IN-COD-PROD.
             MOVE '2018-04-25' TO PAR-IN-FECHA.
             MOVE '23' TO PAR-IN-CANTIDAD.
             MOVE '40.85' TO PAR-IN-IMPORTE.
-            DISPLAY 'ANTES DE INVOCAR EL SUBPROGRAMA'.
             PERFORM LEER-PVE.
+            MOVE 'O' TO PAR-IN-MODO.
+            CALL 'UPD-PROD-VEND' USING PAR-IN, PAR-OUT.
+            MOVE 'U' TO PAR-IN-MODO.
             DISPLAY 'INVOCANDO SUB-PROGRAMA CON ' PAR-IN.
             CALL 'UPD-PROD-VEND' USING PAR-IN, PAR-OUT.
             DISPLAY 'RESULTADO DE LA INVOCACION: ' PAR-OUT.
+            MOVE 'C' TO PAR-IN-MODO.
+            CALL 'UPD-PROD-VEND' USING PAR-IN, PAR-OUT.
             DISPLAY 'DESPUES DE INVOCAR EL SUBPROGRAMA'.
             PERFORM LEER-PVE.
             STOP RUN.
